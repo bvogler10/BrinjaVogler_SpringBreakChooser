@@ -7,27 +7,52 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/selectLanguageLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="127dp"
+        android:layout_marginTop="59dp"
+        android:layout_marginEnd="127dp"
+        android:layout_marginBottom="25dp"
+        android:text="Select Language:"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/languageListView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.241" />
+        app:layout_constraintVertical_bias="0.0">
+    </TextView>
 
-    <Button
-        android:id="@+id/speechToText"
-        android:text="Speech to Text"
+    <ListView
+        android:id="@+id/languageListView"
+        android:layout_width="match_parent"
+        android:layout_height="201dp"
+        android:layout_marginBottom="8dp"
+        android:layout_weight="1"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:listSelector="@android:color/darker_gray"
+        app:layout_constraintBottom_toTopOf="@id/enteredText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/enteredText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="161dp"
-        android:layout_marginTop="87dp"
+        android:layout_marginTop="28dp"
         android:layout_marginEnd="162dp"
+        android:textSize="20sp"
+        android:hint="Enter Text"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView">
-    </Button>
+        app:layout_constraintTop_toBottomOf="@+id/languageListView">
+    </EditText>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
