@@ -42,17 +42,11 @@
 
     <EditText
         android:id="@+id/enteredText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="161dp"
         android:layout_marginTop="28dp"
-        android:layout_marginEnd="162dp"
-        android:textSize="20sp"
         android:hint="Enter Text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/languageListView">
-    </EditText>
+        android:textSize="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/languageListView"></EditText>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
