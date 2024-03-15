@@ -12,17 +12,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
-import android.widget.TextView
 import android.widget.Toast
 import java.lang.Exception
 import java.util.Locale
-import java.util.Objects
-import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     //vars for language choice
