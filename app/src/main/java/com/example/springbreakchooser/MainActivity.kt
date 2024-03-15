@@ -11,6 +11,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -29,16 +30,17 @@ class MainActivity : AppCompatActivity() {
     private val languages = arrayOf("English", "German", "Chinese")
     private val languageCodes = arrayOf("en-US", "de-DE", "zh-CN")
     private lateinit var languageListView: ListView
-
-    //vars for shake event
-    private var sensorManager: SensorManager? = null
-    private var acceleration = 0f
-    private var currentAcceleration = 0f
-    private var lastAcceleration = 0f
+    private lateinit var currentLanguage: String
+    private val locations = mapOf(
+        "en-US" to listOf("New York City", "Boston"),
+        "zh-CN" to listOf("Beijing", "Taipei"),
+        "de-DE" to listOf("Berlin", "Dresden")
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         //language speech to text
         textDisplay = findViewById(R.id.enteredText)
         languageListView = findViewById(R.id.languageListView)
@@ -46,14 +48,13 @@ class MainActivity : AppCompatActivity() {
         languageListView.choiceMode = ListView.CHOICE_MODE_SINGLE
         languageListView.setOnItemClickListener { _, _, position, _ ->
             val selectedLanguage = languageCodes[position]
+            currentLanguage = selectedLanguage
             speak(selectedLanguage)
         }
 
         //shaking
         val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager?
-
         val sensorShake = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(sensorEvent: SensorEvent) {
                 if (sensorEvent != null) {
@@ -62,18 +63,19 @@ class MainActivity : AppCompatActivity() {
                     val z = sensorEvent.values[2]
 
                     if (x > 2 || x < -2 || y > 12 || y < -12 || z > 2 || z < -2) {
-                        openGoogleMaps()
+                        val languageLocations = locations[currentLanguage]
+                        Log.d("Shaken", "Shake detected: a location that speaks $currentLanguage")
+                        val spot = languageLocations!!.random()
+                        openGoogleMaps(spot)
                     }
                 }
             }
 
             override fun onAccuracyChanged(sensor: Sensor, i: Int) {
-                // Do nothing for now
+                // Do nothing
             }
         }
-
         sensorManager?.registerListener(sensorEventListener, sensorShake, SensorManager.SENSOR_DELAY_NORMAL)
-
     }
     //speech to text
     private fun speak(language: String) {
@@ -102,8 +104,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openGoogleMaps() {
-        val location = "New York"
+    private fun openGoogleMaps(location: String) {
+
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse("geo:0,0?q=$location")
         startActivity(intent)
