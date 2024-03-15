@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     )
     private lateinit var tts: TextToSpeech
     private var greetingSpoken = false
+    private var googleOpened = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,10 +67,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                     val z = sensorEvent.values[2]
 
                     if (x > 2 || x < -2 || y > 12 || y < -12 || z > 2 || z < -2) {
-                        val languageLocations = locations[currentLanguage]
-                        Log.d("Shaken", "Shake detected: a location that speaks $currentLanguage")
-                        val spot = languageLocations!!.random()
-                        openGoogleMaps(spot)
+                        if (!googleOpened) {
+                            openGoogleMaps(currentLanguage)
+                        }
                     }
                 }
             }
@@ -110,10 +110,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
-    private fun openGoogleMaps(location: String) {
-        val locale = Locale(currentLanguage)
+    private fun openGoogleMaps(language: String) {
+        googleOpened = true
+        val languageLocations = locations[currentLanguage]
+        val spot = languageLocations!!.random()
+        val locale = Locale(language)
         tts.setLanguage(locale)
-        val greeting = when (currentLanguage) {
+        val greeting = when (language) {
             "en-US" -> "Hello"
             "zh-CN" -> "你好"
             "de-DE" -> "Guten Tag"
@@ -124,7 +127,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             greetingSpoken = true
         }
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("geo:0,0?q=$location")
+        intent.data = Uri.parse("geo:0,0?q=$spot")
         startActivity(intent)
     }
 
@@ -133,11 +136,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         tts.stop()
         tts.shutdown()
         greetingSpoken = false
+        googleOpened = false
     }
 
     override fun onResume() {
         super.onResume()
         greetingSpoken = false
+        googleOpened = false
     }
 
     override fun onInit(status: Int) {
