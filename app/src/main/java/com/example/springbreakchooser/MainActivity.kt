@@ -7,6 +7,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.speech.RecognizerIntent
@@ -49,16 +50,29 @@ class MainActivity : AppCompatActivity() {
         }
 
         //shaking
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager?
 
-        Objects.requireNonNull(sensorManager)!!
-            .registerListener(sensorListener, sensorManager!!
-                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
+        val sensorShake = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-        acceleration = 10f
-        currentAcceleration = SensorManager.GRAVITY_EARTH
-        lastAcceleration = SensorManager.GRAVITY_EARTH
+        val sensorEventListener = object : SensorEventListener {
+            override fun onSensorChanged(sensorEvent: SensorEvent) {
+                if (sensorEvent != null) {
+                    val x = sensorEvent.values[0]
+                    val y = sensorEvent.values[1]
+                    val z = sensorEvent.values[2]
 
+                    if (x > 2 || x < -2 || y > 12 || y < -12 || z > 2 || z < -2) {
+                        openGoogleMaps()
+                    }
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor, i: Int) {
+                // Do nothing for now
+            }
+        }
+
+        sensorManager?.registerListener(sensorEventListener, sensorShake, SensorManager.SENSOR_DELAY_NORMAL)
 
     }
     //speech to text
@@ -66,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         val mIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
-        mIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Hi say something")
+        mIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say something")
 
         try {
             startActivityForResult(mIntent, REQUEST_CODE_SPEECH_INPUT)
@@ -88,35 +102,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //shaking sensor listener
-    private val sensorListener: SensorEventListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            val x = event.values[0]
-            val y = event.values[1]
-            val z = event.values[2]
-            lastAcceleration = currentAcceleration
-
-            currentAcceleration = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
-            val delta: Float = currentAcceleration - lastAcceleration
-            acceleration = acceleration * 0.9f + delta
-
-            // show a toast when phone is shaken
-            if (acceleration > 5) {
-                Toast.makeText(applicationContext, "Shake event detected", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
-        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
-    }
-    override fun onResume() {
-        sensorManager?.registerListener(sensorListener, sensorManager!!.getDefaultSensor(
-            Sensor .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
-        )
-        super.onResume()
-    }
-
-    override fun onPause() {
-        sensorManager!!.unregisterListener(sensorListener)
-        super.onPause()
+    private fun openGoogleMaps() {
+        val location = "New York"
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("geo:0,0?q=$location")
+        startActivity(intent)
     }
 }
