@@ -11,6 +11,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -23,19 +24,21 @@ import java.util.Locale
 import java.util.Objects
 import kotlin.math.sqrt
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     //vars for language choice
     private val REQUEST_CODE_SPEECH_INPUT = 100
     private lateinit var textDisplay: EditText
     private val languages = arrayOf("English", "German", "Chinese")
     private val languageCodes = arrayOf("en-US", "de-DE", "zh-CN")
     private lateinit var languageListView: ListView
-    private lateinit var currentLanguage: String
+    private var currentLanguage: String = "en-US"
     private val locations = mapOf(
         "en-US" to listOf("New York City", "Boston"),
         "zh-CN" to listOf("Beijing", "Taipei"),
         "de-DE" to listOf("Berlin", "Dresden")
     )
+    private lateinit var tts: TextToSpeech
+    private var greetingSpoken = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +79,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         sensorManager?.registerListener(sensorEventListener, sensorShake, SensorManager.SENSOR_DELAY_NORMAL)
+        //text to speech
+        tts = TextToSpeech(this, this)
+
     }
     //speech to text
     private fun speak(language: String) {
@@ -105,9 +111,39 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openGoogleMaps(location: String) {
-
+        val locale = Locale(currentLanguage)
+        tts.setLanguage(locale)
+        val greeting = when (currentLanguage) {
+            "en-US" -> "Hello"
+            "zh-CN" -> "你好"
+            "de-DE" -> "Guten Tag"
+            else -> "Hello"
+        }
+        if (!greetingSpoken) {
+            tts.speak(greeting, TextToSpeech.QUEUE_FLUSH, null, "")
+            greetingSpoken = true
+        }
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse("geo:0,0?q=$location")
         startActivity(intent)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        tts.stop()
+        tts.shutdown()
+        greetingSpoken = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        greetingSpoken = false
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            val locale = Locale(currentLanguage)
+            tts.setLanguage(locale)
+        }
     }
 }
